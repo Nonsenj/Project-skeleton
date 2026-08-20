@@ -1,0 +1,8 @@
+[advisories]
+ignore = [
+   # h2 0.3.x pulled transitively via actix-http/actix-web's internal hyper 0.14.
+   # No newer 0.3.x release exists upstream to satisfy actix-web's requirement.
+   # Low-severity DoS (unbounded empty DATA frames) — reassess when actix-web
+   # migrates to hyper 1.x / h2 0.4.x. Tracking: <link to actix-web issue if one exists>
+   "RUSTSEC-2026-0258",
+]

@@ -1,7 +1,7 @@
 #[derive(serde::Deserialize)]
 pub struct Settings {
     pub database: DatabaseSettings,
-    pub application_port: u16
+    pub application_port: u16,
 }
 
 #[derive(serde::Deserialize, Clone)]
@@ -15,24 +15,24 @@ pub struct DatabaseSettings {
 
 impl DatabaseSettings {
     pub fn connection_string(&self) -> String {
-	format!(
-	    "postgres://{}:{}@{}:{}/{}",
-	    self.username, self.password, self.host, self.port, self.database_name
-	)
+        format!(
+            "postgres://{}:{}@{}:{}/{}",
+            self.username, self.password, self.host, self.port, self.database_name
+        )
     }
 }
 
 pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     //Initialise our configuration reader
     let settings = config::Config::builder()
-	//Add configuration values from a file named 'configuration.yaml'.
-	.add_source(
-	    config::File::new("configuration.yaml", config::FileFormat::Yaml)
-	)
-	.build()?;
+        //Add configuration values from a file named 'configuration.yaml'.
+        .add_source(config::File::new(
+            "configuration.yaml",
+            config::FileFormat::Yaml,
+        ))
+        .build()?;
 
     //Convert the configuration values it read into
     //Settings type
     settings.try_deserialize::<Settings>()
 }
-

@@ -1,11 +1,35 @@
-use actix_web::{web, HttpResponse};
+use actix_web::{HttpResponse, web};
+use sqlx::PgPool;
+use chrono::Utc;
+use uuid::Uuid;
 
 #[derive(serde::Deserialize)]
 pub struct FormDate {
     email: String,
-    name: String
+    name: String,
 }
 
-pub async fn subscribe(_form: web::Form<FormDate>) -> HttpResponse {
-    HttpResponse::Ok().finish()
+pub async fn subscribe(
+    form: web::Form<FormDate>,
+    pool: web::Data<PgPool>,
+) -> HttpResponse {
+    match sqlx::query!(
+	r#"
+	INSERT INTO subscriptions (id, email, name, subscribed_at)
+	VALUES ($1, $2, $3, $4)
+	"#,
+	Uuid::new_v4(),
+	form.email,
+	form.name,
+	Utc::now()
+    )
+    .execute(pool.get_ref())
+    .await
+    {
+	Ok(_) => HttpResponse::Ok().finish(),
+	Err(e) => {
+	    println!("Faild to execute query: {}", e);
+	    HttpResponse::InternalServerError().finish()
+	}
+    }
 }

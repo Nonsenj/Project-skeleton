@@ -5,6 +5,8 @@ use uuid::Uuid;
 use zero2prod::configuration::{DatabaseSettings, get_configuration};
 use zero2prod::startup::run;
 use zero2prod::telemetry::{get_subscriber, init_subscriber};
+use secrecy::Secret;
+use secrecy::ExposeSecret;
 
 static TRACING: LazyLock<()> = LazyLock::new(|| {
     let default_filter_level = "info".to_string();
@@ -47,11 +49,11 @@ async fn configure_database(config: &DatabaseSettings) -> PgPool {
     let maintenance_settings = DatabaseSettings {
         database_name: "postgres".to_string(),
         username: "postgres".to_string(),
-        password: "password".to_string(),
+        password: Secret::new("password".to_string()),
         ..config.clone()
     };
 
-    let mut connection = PgConnection::connect(&maintenance_settings.connection_string())
+    let mut connection = PgConnection::connect(&maintenance_settings.connection_string().expose_secret())
         .await
         .expect("Failed to connect to Postgres");
     connection
@@ -60,7 +62,7 @@ async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .expect("Failed to create database.");
 
     //Migrate database
-    let connection_pool = PgPool::connect(&config.connection_string())
+    let connection_pool = PgPool::connect(&config.connection_string().expose_secret())
         .await
         .expect("Failed to connect to Postgres");
     sqlx::migrate!("./migrations")

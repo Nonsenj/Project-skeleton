@@ -1,5 +1,5 @@
-use secrecy::Secret;
 use secrecy::ExposeSecret;
+use secrecy::Secret;
 
 #[derive(serde::Deserialize)]
 pub struct Settings {
@@ -21,10 +21,10 @@ impl DatabaseSettings {
         Secret::new(format!(
             "postgres://{}:{}@{}:{}/{}",
             self.username,
-	    self.password.expose_secret(), 
-	    self.host, 
-	    self.port, 
-	    self.database_name
+            self.password.expose_secret(),
+            self.host,
+            self.port,
+            self.database_name
         ))
     }
 }

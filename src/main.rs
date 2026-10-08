@@ -18,11 +18,10 @@ async fn main() -> Result<(), std::io::Error> {
     //Panic if we can't read configuration
     let configuration = get_configuration().expect("Failed to read configuration.");
     let connection_pool =
-        PgPool::connect(configuration.database.connection_string().expose_secret())
-            .await
-            .expect("Failed to connect to Postgres.");
+        PgPool::connect_lazy_with(configuration.database.connect_options());
     //Removed the hard-code port '8000' it's coming from our settings
-    let address = format!("127.0.0.1:{}", configuration.application_port);
+    let address = format!("{}:{}",
+	configuration.application.host, configuration.application.port);
     let listener = TcpListener::bind(address)?;
 
     run(listener, connection_pool)?.await?;
